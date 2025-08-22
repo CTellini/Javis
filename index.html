@@ -15,10 +15,24 @@
     
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- ElevenLabs Widget - Simple Implementation -->
+    <!-- ElevenLabs Widget - Configuração Corrigida -->
+    <script>
+      window.addEventListener('load', function() {
+        // Aguarda o carregamento completo da página
+        setTimeout(() => {
+          const widget = document.querySelector('elevenlabs-convai');
+          if (widget) {
+            console.log('Widget ElevenLabs encontrado e carregado');
+          } else {
+            console.error('Widget ElevenLabs não encontrado');
+          }
+        }, 1000);
+      });
+    </script>
+    
     <elevenlabs-convai 
       agent-id="agent_1201k31c9rdde74a965b0pbnn6xh"
-      style="position: fixed !important; bottom: 120px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 10000 !important;"
+      style="position: fixed; bottom: 20px; right: 20px; z-index: 10000;"
     ></elevenlabs-convai>
   </body>
 </html>

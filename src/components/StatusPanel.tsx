@@ -4,6 +4,7 @@ interface Metric {
   label: string;
   value: string;
   color: 'cyan' | 'green' | 'blue';
+  status?: 'online' | 'offline' | 'warning';
 }
 
 interface StatusPanelProps {
@@ -26,6 +27,18 @@ const StatusPanel: React.FC<StatusPanelProps> = ({ title, icon, metrics }) => {
     }
   };
 
+  const getStatusIndicator = (status?: string) => {
+    switch (status) {
+      case 'online':
+        return <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />;
+      case 'offline':
+        return <div className="w-2 h-2 bg-red-400 rounded-full" />;
+      case 'warning':
+        return <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />;
+      default:
+        return null;
+    }
+  };
   return (
     <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-cyan-500/20 rounded-lg p-4 hover:border-cyan-400/40 transition-colors duration-300">
       <div className="flex items-center space-x-2 mb-4">
@@ -39,9 +52,12 @@ const StatusPanel: React.FC<StatusPanelProps> = ({ title, icon, metrics }) => {
         {metrics.map((metric, index) => (
           <div key={index} className="flex justify-between items-center">
             <span className="text-gray-300 text-xs">{metric.label}</span>
-            <span className={`text-xs font-mono font-semibold ${getColorClasses(metric.color)}`}>
-              {metric.value}
-            </span>
+            <div className="flex items-center space-x-2">
+              {getStatusIndicator(metric.status)}
+              <span className={`text-xs font-mono font-semibold ${getColorClasses(metric.color)}`}>
+                {metric.value}
+              </span>
+            </div>
           </div>
         ))}
       </div>

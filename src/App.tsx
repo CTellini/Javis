@@ -9,6 +9,7 @@ function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [cpuUsage, setCpuUsage] = useState(0);
   const [memoryUsage, setMemoryUsage] = useState(0);
+  const [voiceStatus, setVoiceStatus] = useState<'offline' | 'online' | 'warning'>('offline');
 
   useEffect(() => {
     const timeInterval = setInterval(() => {
@@ -20,9 +21,25 @@ function App() {
       setMemoryUsage(Math.random() * 100);
     }, 2000);
 
+    // Verificar status do widget de voz
+    const checkVoiceWidget = () => {
+      const widget = document.querySelector('elevenlabs-convai');
+      if (widget) {
+        setVoiceStatus('online');
+        console.log('Widget de voz detectado e online');
+      } else {
+        setVoiceStatus('warning');
+        console.log('Widget de voz não detectado');
+      }
+    };
+
+    // Verificar imediatamente e depois a cada 5 segundos
+    checkVoiceWidget();
+    const voiceCheckInterval = setInterval(checkVoiceWidget, 5000);
     return () => {
       clearInterval(timeInterval);
       clearInterval(metricsInterval);
+      clearInterval(voiceCheckInterval);
     };
   }, []);
 
@@ -77,18 +94,27 @@ function App() {
             title="Sistema"
             icon={<Monitor className="w-5 h-5" />}
             metrics={[
-              { label: 'CPU', value: `${cpuUsage.toFixed(1)}%`, color: 'cyan' },
-              { label: 'RAM', value: `${memoryUsage.toFixed(1)}%`, color: 'green' },
-              { label: 'Rede', value: '1.2GB/s', color: 'blue' }
+              { label: 'CPU', value: `${cpuUsage.toFixed(1)}%`, color: 'cyan', status: 'online' },
+              { label: 'RAM', value: `${memoryUsage.toFixed(1)}%`, color: 'green', status: 'online' },
+              { label: 'Rede', value: '1.2GB/s', color: 'blue', status: 'online' }
+            ]}
+          />
+          <StatusPanel 
+            title="Assistente de Voz"
+            icon={<Activity className="w-5 h-5" />}
+            metrics={[
+              { label: 'Status', value: voiceStatus === 'online' ? 'ATIVO' : voiceStatus === 'warning' ? 'CARREGANDO' : 'OFFLINE', color: voiceStatus === 'online' ? 'green' : 'cyan', status: voiceStatus },
+              { label: 'Modelo', value: 'ElevenLabs', color: 'cyan', status: 'online' },
+              { label: 'Latência', value: '~200ms', color: 'blue', status: 'online' }
             ]}
           />
           <StatusPanel 
             title="Segurança"
             icon={<Shield className="w-5 h-5" />}
             metrics={[
-              { label: 'Firewall', value: 'ATIVO', color: 'green' },
-              { label: 'Intrusões', value: '0', color: 'cyan' },
-              { label: 'Última varredura', value: '15min', color: 'blue' }
+              { label: 'Firewall', value: 'ATIVO', color: 'green', status: 'online' },
+              { label: 'Intrusões', value: '0', color: 'cyan', status: 'online' },
+              { label: 'Última varredura', value: '15min', color: 'blue', status: 'online' }
             ]}
           />
         </div>
@@ -108,10 +134,27 @@ function App() {
             </div>
             
             {/* Central Widget Container */}
-            <div className="relative z-10 w-80 h-80 lg:w-96 lg:h-96 rounded-full bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-cyan-400/20 flex items-center justify-center shadow-2xl">
+            <div 
+              className="relative z-10 w-80 h-80 lg:w-96 lg:h-96 rounded-full bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-cyan-400/20 flex items-center justify-center shadow-2xl cursor-pointer hover:border-cyan-400/40 transition-all duration-300"
+              onClick={() => {
+                // Tentar ativar o widget de voz
+                const widget = document.querySelector('elevenlabs-convai');
+                if (widget) {
+                  console.log('Tentando ativar widget de voz...');
+                  // Simular clique no widget
+                  widget.click();
+                } else {
+                  console.error('Widget de voz não encontrado');
+                  alert('Widget de voz não está disponível. Verifique sua conexão com a internet.');
+                }
+              }}
+            >
               <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-full bg-gradient-to-br from-cyan-500/5 to-blue-500/5 border border-cyan-400/30 flex items-center justify-center relative">
                 {/* Breathing effect */}
                 <div className="absolute inset-0 rounded-full bg-cyan-400/10 animate-ping pointer-events-none" />
+                
+                {/* Pulse indicator for voice activation */}
+                <div className="absolute inset-4 rounded-full border-2 border-cyan-400/50 animate-pulse pointer-events-none" />
                 
                 {/* Central Label */}
                 <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center pointer-events-none">
@@ -119,7 +162,7 @@ function App() {
                     NORA
                   </div>
                   <div className="text-cyan-300/70 text-xs mt-1">
-                    AI Voice Assistant
+                    Clique para ativar voz
                   </div>
                 </div>
               </div>
